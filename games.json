@@ -1,0 +1,34 @@
+{
+    "games": [
+        {
+            "name": "OSU",
+            "description": "Clicker game meow",
+            "executable_path": "C:/Users/Clin/AppData/Local/osulazer/current/osu!.exe",
+            "image_path": ""
+        },
+        {
+            "name": "meow",
+            "description": "meow2",
+            "executable_path": "C:/Users/Clin/AppData/Local/FiveM/FiveM.exe",
+            "image_path": "assets/game_images\\Screenshot 2025-01-21 151733.png"
+        },
+        {
+            "name": "a",
+            "description": "t",
+            "executable_path": "C:/Users/Clin/Downloads/PrismLauncher-Windows-MSVC-Setup-9.4.exe",
+            "image_path": ""
+        },
+        {
+            "name": "b",
+            "description": "c",
+            "executable_path": "C:/Users/Clin/Downloads/FACEIT-setup-latest.exe",
+            "image_path": ""
+        },
+        {
+            "name": "d",
+            "description": "e",
+            "executable_path": "C:/Users/Clin/Downloads/WhatsApp Installer.exe",
+            "image_path": ""
+        }
+    ]
+}

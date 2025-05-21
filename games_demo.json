@@ -1,0 +1,52 @@
+{
+    "games": [
+        {
+            "name": "Arcade Classic",
+            "description": "A collection of classic arcade games including Pacman, Space Invaders, and more!",
+            "image_path": "assets/game_images/arcade_anim.gif",
+            "executable_path": "C:/Games/ArcadeCollection/arcade.exe"
+        },
+        {
+            "name": "Space Invaders 2025",
+            "description": "Modern remake of the classic space invaders with updated graphics and gameplay.",
+            "image_path": "assets/game_images/space_invader.gif",
+            "executable_path": "C:/Games/SpaceInvaders2025/si2025.exe"
+        },
+        {
+            "name": "Retro Controller Demo",
+            "description": "Test your controllers and configure them for use with emulators.",
+            "image_path": "assets/game_images/controller.gif",
+            "executable_path": "C:/Games/RetroConfig/controller_test.exe"
+        },
+        {
+            "name": "Demo Game 1",
+            "description": "This is a demonstration game entry. Replace with your actual game.",
+            "image_path": null,
+            "executable_path": "C:/Games/Demo1/game.exe"
+        },
+        {
+            "name": "Demo Game 2",
+            "description": "Another demonstration game entry. Replace with your actual game.",
+            "image_path": null,
+            "executable_path": "C:/Games/Demo2/game.exe"
+        },
+        {
+            "name": "Curseforge",
+            "description": "Minecraft mod manager and game launcher for custom modpacks.",
+            "image_path": null,
+            "executable_path": "C:/Users/Clin/AppData/Local/Programs/CurseForge Windows/CurseForge.exe"
+        },
+        {
+            "name": "Demo Game 3",
+            "description": "Example of a longer game description that might span multiple lines when displayed in the interface.",
+            "image_path": null,
+            "executable_path": "C:/Games/Demo3/game.exe"
+        },
+        {
+            "name": "Pixelart Game 1",
+            "description": "An example game with pixelart graphics and animations.",
+            "image_path": null,
+            "executable_path": "C:/Games/PixelGame1/pixel.exe"
+        }
+    ]
+}

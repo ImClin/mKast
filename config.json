@@ -1,0 +1,13 @@
+{
+    "admin_password": "admin123",
+    "exit_password": "exit123",
+    "fullscreen": true,
+    "resolution": [2560, 1440],
+    "theme": {
+        "background_color": [91, 192, 235],
+        "button_color": [25, 118, 210],
+        "button_hover_color": [13, 71, 161],
+        "text_color": [255, 255, 255],
+        "header_color": [184, 207, 8]
+    }
+}
