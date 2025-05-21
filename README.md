@@ -1,43 +1,43 @@
-# mKast Game Launcher - Quick Start Guide
+# mKast Game Launcher - Snelstartgids
 
-## Overview
+## Overzicht
 
-mKast is a customizable game launcher with a retro arcade style interface. It allows you to organize and launch your games from a single, attractive interface with support for:
+mKast is een aanpasbare game launcher met een retro arcade-stijl interface. Hiermee kun je al je games organiseren en starten vanuit één aantrekkelijk overzicht met ondersteuning voor:
 
-- Automatic game icon extraction from EXE files
-- Custom pixelart images and animated GIFs
-- Grid layout that adapts to your screen resolution
-- Admin mode for adding/editing games
-- Password protection to prevent unauthorized exit
+- Automatische extractie van game-iconen uit EXE-bestanden  
+- Aangepaste pixelart-afbeeldingen en geanimeerde GIFs  
+- Rasterindeling die zich aanpast aan je schermresolutie  
+- Admin-modus voor het toevoegen/bewerken van games  
+- Wachtwoordbeveiliging om ongeautoriseerde afsluiting te voorkomen  
 
-## Getting Started
+## Aan de slag
 
-1. **Run the launcher**:
-   ```
+1. **Start de launcher**:
+   ```bash
    python game_launcher.py
    ```
 
-2. **Default passwords**:
-   - Admin mode: `admin123`
-   - Exit: `exit123`
+2. **Standaard wachtwoorden**:
+   - Admin-modus: `admin123`
+   - Afsluiten: `exit123`
    
-   These can be changed in the `config.json` file.
+   Deze kunnen worden aangepast in het bestand `config.json`.
 
-3. **Adding games**:
-   - Click "Admin" and enter the admin password
-   - Click "Add New Game"
-   - Select a game executable (.exe file)
-   - Enter name and description
-   - Choose whether to use a custom image or extract the icon from the EXE
+3. **Games toevoegen**:
+   - Klik op "Admin" en voer het admin-wachtwoord in
+   - Klik op "Add New Game"
+   - Selecteer een uitvoerbaar bestand (.exe)
+   - Voer een naam en beschrijving in
+   - Kies of je een aangepaste afbeelding wilt gebruiken of het icoon uit de EXE wilt halen
 
-4. **Launching games**:
-   - Click on any game in the grid
-   - Click the "Launch" button to start the game
-   - The launcher will minimize while the game is running
+4. **Games starten**:
+   - Klik op een game in het raster
+   - Klik op de knop "Launch" om het spel te starten
+   - De launcher minimaliseert terwijl het spel draait
 
-## Configuration
+## Configuratie
 
-The `config.json` file contains settings you can customize:
+Het bestand `config.json` bevat instellingen die je kunt aanpassen:
 
 ```json
 {
@@ -55,52 +55,52 @@ The `config.json` file contains settings you can customize:
 }
 ```
 
-- To run in windowed mode, set `"fullscreen": false`
-- Customize colors by changing RGB values in `theme`
-- Change passwords for security
+- Zet `"fullscreen": false` om in venstermodus te draaien  
+- Pas kleuren aan via de RGB-waarden in `theme`  
+- Wijzig wachtwoorden voor extra beveiliging
 
-## Custom Pixelart
+## Aangepaste Pixelart
 
-For the best visual appeal, consider using custom pixelart images:
+Voor de beste visuele ervaring kun je aangepaste pixelart gebruiken:
 
-1. **Static images**: Use PNG format with a recommended size of 200x200 pixels
-2. **Animations**: Use GIF format with 4-8 frames for a retro feel
-3. **Detailed guides**:
-   - Check `assets/README.md` for instructions on adding images
-   - Check `assets/PIXELART_GUIDE.md` for creating your own pixelart
+1. **Statische afbeeldingen**: Gebruik PNG-formaat met een aanbevolen formaat van 200x200 pixels  
+2. **Animaties**: Gebruik GIF-formaat met 4–8 frames voor een retro gevoel  
+3. **Gedetailleerde handleidingen**:
+   - Zie `assets/README.md` voor instructies over het toevoegen van afbeeldingen  
+   - Zie `assets/PIXELART_GUIDE.md` voor het maken van je eigen pixelart  
 
-## Demo Content
+## Demo-inhoud
 
-Try the `games_demo.json` file to see examples of animated GIFs:
+Probeer het bestand `games_demo.json` om voorbeelden te zien met geanimeerde GIFs:
 
-```
+```bash
 python game_launcher.py -g games_demo.json
 ```
 
-Or copy the demo images to your regular games list.
+Of kopieer de demo-afbeeldingen naar je normale gameslijst.
 
 ## Tips & Tricks
 
-1. **Custom fonts**: Place a pixel font named `pixel.ttf` in the `assets/fonts` folder
-2. **Performance**: If animations are slow, use static PNGs instead of GIFs
-3. **Organizing games**: You can edit the `games.json` file directly if you prefer
-4. **Screen scaling**: The grid automatically adjusts based on your screen resolution
+1. **Aangepaste lettertypes**: Plaats een pixellettertype met de naam `pixel.ttf` in de map `assets/fonts`  
+2. **Prestaties**: Als animaties traag zijn, gebruik dan PNG’s in plaats van GIFs  
+3. **Games organiseren**: Je kunt ook direct het bestand `games.json` bewerken  
+4. **Schaalbaarheid scherm**: Het raster past zich automatisch aan jouw schermresolutie aan  
 
-## Keyboard Shortcuts
+## Sneltoetsen
 
-- `ESC` key: Exit admin mode (only works when in admin mode)
-- All other exits are password-protected for arcade-style security
+- `ESC`-toets: Verlaat admin-modus (alleen wanneer je in admin-modus bent)  
+- Alle andere manieren van afsluiten zijn wachtwoordbeveiligd, zoals bij arcade-machines
 
-## Troubleshooting
+## Problemen oplossen
 
-If you encounter issues:
-1. Check that all required Python libraries are installed
-2. Verify file paths in your games.json are correct
-3. Make sure assets folders exist and have proper permissions
+Als je tegen problemen aanloopt:
+1. Controleer of alle benodigde Python-bibliotheken zijn geïnstalleerd  
+2. Controleer of de bestandslocaties in `games.json` juist zijn  
+3. Zorg dat de `assets`-mappen bestaan en de juiste rechten hebben
 
 ## Credits
 
-The mKast Game Launcher uses:
-- Pygame for graphics and UI
-- PIL/Pillow for image processing
-- Pixel Emulator font by Genshichi Yasui
+De mKast Game Launcher maakt gebruik van:
+- Pygame voor grafische weergave en UI  
+- PIL/Pillow voor beeldverwerking  
+- Pixel Emulator-lettertype van Genshichi Yasui  
