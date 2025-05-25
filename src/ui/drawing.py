@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """UI drawing utilities for mKast Game Launcher."""
 
-import pygame
+import pygame  # type: ignore
 
 # Constants
 WHITE = (255, 255, 255)
@@ -188,15 +188,14 @@ class DrawingHelpers:
         # Draw shadow first, then text
         self.screen.blit(text_shadow, shadow_rect)
         self.screen.blit(text_surf, text_rect)
-        
-        # Return action if clicked
+          # Return action if clicked
         if is_hover and click[0] == 1 and action is not None:
             # Add a small delay to prevent multiple clicks
             pygame.time.delay(100)
             return action
         
         return None
-
+        
     def draw_pixel_arrow(self, size, direction="right"):
         """Draw a pixelated arrow.
         
@@ -211,74 +210,102 @@ class DrawingHelpers:
         surface.fill((0, 0, 0, 0))  # Transparent background
         
         # Calculate pixel size for the arrow
-        pixel_size = max(2, size // 10)
+        pixel_size = max(3, size // 8)
         
-        # Colors for the arrow
-        arrow_color = (220, 220, 220)  # White arrow
-        shadow_color = (100, 100, 100, 180)  # Shadow with alpha
-        
-        # Determine points for arrow based on direction
-        shadow_offset = pixel_size
+        # Colors for the arrow - brighter and more colorful
+        arrow_color = (255, 220, 0)  # Yellow-gold arrow
+        outline_color = (0, 0, 0)  # Black outline
+        glow_color = (255, 150, 0, 150)  # Orange glow with alpha
+          # Determine points for arrow based on direction
+        outline_offset = 1
+        glow_size = pixel_size * 2
         
         if direction == "right":
             # Right-pointing arrow
             mid_y = size // 2
             
+            # Draw glow effect first (behind everything)
+            pygame.draw.circle(surface, glow_color, (size // 3, mid_y), size // 3)
+            
             # Draw arrow shaft with pixels
             for i in range(6):
-                # Vertical line of arrow shaft
-                pygame.draw.rect(surface, shadow_color, 
-                              (shadow_offset, mid_y - 3*pixel_size + i*pixel_size, pixel_size, pixel_size))
+                y_pos = mid_y - 3*pixel_size + i*pixel_size
+                
+                # Black outline
+                pygame.draw.rect(surface, outline_color, 
+                              (-outline_offset, y_pos-outline_offset, 
+                               pixel_size+2*outline_offset, pixel_size+2*outline_offset))
+                
+                # Arrow shaft
                 pygame.draw.rect(surface, arrow_color, 
-                              (0, mid_y - 3*pixel_size + i*pixel_size, pixel_size, pixel_size))
+                              (0, y_pos, pixel_size, pixel_size))
             
             # Arrow head as triangle
             for i in range(1, 7):
                 line_length = i
                 y_offset = 3 - i
                 
-                # Shadow
-                pygame.draw.rect(surface, shadow_color, 
-                              (pixel_size + shadow_offset, mid_y + y_offset*pixel_size, line_length*pixel_size, pixel_size))
-                pygame.draw.rect(surface, shadow_color, 
-                              (pixel_size + shadow_offset, mid_y - (y_offset+1)*pixel_size, line_length*pixel_size, pixel_size))
+                y_top = mid_y - (y_offset+1)*pixel_size
+                y_bottom = mid_y + y_offset*pixel_size
+                x_start = pixel_size
                 
-                # Arrow
+                # Black outline for arrow head top
+                pygame.draw.rect(surface, outline_color, 
+                              (x_start-outline_offset, y_top-outline_offset, 
+                               line_length*pixel_size+2*outline_offset, pixel_size+2*outline_offset))
+                
+                # Black outline for arrow head bottom
+                pygame.draw.rect(surface, outline_color, 
+                              (x_start-outline_offset, y_bottom-outline_offset, 
+                               line_length*pixel_size+2*outline_offset, pixel_size+2*outline_offset))
+                  # Arrow head top and bottom
                 pygame.draw.rect(surface, arrow_color, 
-                              (pixel_size, mid_y + y_offset*pixel_size, line_length*pixel_size, pixel_size))
+                              (x_start, y_top, line_length*pixel_size, pixel_size))
                 pygame.draw.rect(surface, arrow_color, 
-                              (pixel_size, mid_y - (y_offset+1)*pixel_size, line_length*pixel_size, pixel_size))
+                              (x_start, y_bottom, line_length*pixel_size, pixel_size))
         else:
             # Left-pointing arrow
             mid_y = size // 2
             
+            # Draw glow effect first (behind everything)
+            pygame.draw.circle(surface, glow_color, (2*size // 3, mid_y), size // 3)
+            
             # Draw left-pointing arrow
             for i in range(6):
-                # Vertical line of arrow shaft
-                pygame.draw.rect(surface, shadow_color, 
-                              (size - pixel_size + shadow_offset, mid_y - 3*pixel_size + i*pixel_size, pixel_size, pixel_size))
+                y_pos = mid_y - 3*pixel_size + i*pixel_size
+                
+                # Black outline
+                pygame.draw.rect(surface, outline_color, 
+                              (size - pixel_size - outline_offset, y_pos-outline_offset, 
+                               pixel_size+2*outline_offset, pixel_size+2*outline_offset))
+                
+                # Arrow shaft
                 pygame.draw.rect(surface, arrow_color, 
-                              (size - pixel_size, mid_y - 3*pixel_size + i*pixel_size, pixel_size, pixel_size))
+                              (size - pixel_size, y_pos, pixel_size, pixel_size))
             
             # Arrow head as triangle
             for i in range(1, 7):
                 line_length = i
                 y_offset = 3 - i
                 
-                # Shadow
-                pygame.draw.rect(surface, shadow_color, 
-                              (size - pixel_size - line_length*pixel_size + shadow_offset, 
-                               mid_y + y_offset*pixel_size, line_length*pixel_size, pixel_size))
-                pygame.draw.rect(surface, shadow_color, 
-                              (size - pixel_size - line_length*pixel_size + shadow_offset, 
-                               mid_y - (y_offset+1)*pixel_size, line_length*pixel_size, pixel_size))
+                y_top = mid_y - (y_offset+1)*pixel_size
+                y_bottom = mid_y + y_offset*pixel_size
+                x_end = size - pixel_size
                 
-                # Arrow
+                # Black outline for arrow head top
+                pygame.draw.rect(surface, outline_color, 
+                              (x_end - line_length*pixel_size-outline_offset, y_top-outline_offset, 
+                               line_length*pixel_size+2*outline_offset, pixel_size+2*outline_offset))
+                
+                # Black outline for arrow head bottom
+                pygame.draw.rect(surface, outline_color, 
+                              (x_end - line_length*pixel_size-outline_offset, y_bottom-outline_offset, 
+                               line_length*pixel_size+2*outline_offset, pixel_size+2*outline_offset))
+                
+                # Arrow head top and bottom
                 pygame.draw.rect(surface, arrow_color, 
-                              (size - pixel_size - line_length*pixel_size, 
-                               mid_y + y_offset*pixel_size, line_length*pixel_size, pixel_size))
+                              (x_end - line_length*pixel_size, y_top, line_length*pixel_size, pixel_size))
                 pygame.draw.rect(surface, arrow_color, 
-                              (size - pixel_size - line_length*pixel_size, 
-                               mid_y - (y_offset+1)*pixel_size, line_length*pixel_size, pixel_size))
+                              (x_end - line_length*pixel_size, y_bottom, line_length*pixel_size, pixel_size))
         
         return surface

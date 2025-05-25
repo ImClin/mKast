@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Main screen for mKast Game Launcher."""
 
-import pygame
+import pygame  # type: ignore  # type: ignore
 from src.ui.drawing import WHITE
 
 class MainScreen:
@@ -36,10 +36,9 @@ class MainScreen:
         # Grid layout
         self.grid_columns = 4
         self.grid_rows = 1
-        
-        # Pagination
-        self.current_page = 0
-        self.games_per_page = self.grid_columns * self.grid_rows
+          # Pagination
+        self.current_index = 0  # Starting index (first game to show)
+        self.games_per_screen = self.grid_columns * self.grid_rows  # 4 games per screen
     
     def draw(self, games, admin_password_action, exit_password_action, launch_game_func, change_page_func):
         """Draw the main screen.
@@ -108,11 +107,7 @@ class MainScreen:
         self.screen.blit(hogeschool_title, (hogeschool_x, hogeschool_y))
         self.screen.blit(game_title, (game_x, game_y))
         self.screen.blit(lab_title, (lab_x, lab_y))
-        
-        # Draw games in grid format
-        start_index = self.current_page * self.games_per_page
-        end_index = min(start_index + self.games_per_page, len(games))
-        
+          # Draw games in grid format
         if len(games) == 0:
             # Show "No games available" message
             self.drawer.draw_text("No games available.", self.font, WHITE, 
@@ -128,14 +123,14 @@ class MainScreen:
             available_width = self.resolution[0] - (grid_margin_x * 2) - (grid_spacing_x * (self.grid_columns - 1))
             card_width = available_width // self.grid_columns
             card_height = int(400 * self.scale_y)  # Taller cards for pixel art design
-            
-            # Draw a card for each game
-            for i in range(start_index, end_index):
+              # Draw a card for each game
+            end_index = min(self.current_index + self.games_per_screen, len(games))
+            for i in range(self.current_index, end_index):
                 if i >= len(games):
                     break
                     
                 # Calculate grid position
-                grid_index = i - start_index
+                grid_index = i - self.current_index
                 col = grid_index % self.grid_columns
                 row = grid_index // self.grid_columns
                 
@@ -347,21 +342,21 @@ class MainScreen:
                     if click[0] == 1:
                         pygame.time.delay(100)  # Prevent double-clicks
                         return lambda exe_path=game['executable_path']: launch_game_func(exe_path)
-            
-            # Navigation arrows on sides of screen
-            if len(games) > self.games_per_page:
+              # Navigation arrows on sides of screen
+            if len(games) > self.games_per_screen:
                 # Arrow size and position
-                arrow_size = int(60 * self.scale_min)
+                arrow_size = int(80 * self.scale_min)  # Larger arrows
                 arrow_y = grid_margin_y + card_height // 2 - arrow_size // 2
-                arrow_margin = int(10 * self.scale_x)
+                arrow_margin = int(20 * self.scale_x)  # More space from edge
                 
                 # Get mouse info for click detection
                 mouse_pos = pygame.mouse.get_pos()
                 click = pygame.mouse.get_pressed()
                 
                 # Left arrow (previous games)
-                if self.current_page > 0:
-                    left_arrow_x = grid_margin_x - arrow_size - arrow_margin
+                if self.current_index > 0:
+                    # Position left arrow properly inside the screen
+                    left_arrow_x = max(arrow_margin, grid_margin_x // 2 - arrow_size // 2)
                     
                     # Draw a pixelated left arrow
                     left_arrow = self.drawer.draw_pixel_arrow(arrow_size, "left")
@@ -374,8 +369,10 @@ class MainScreen:
                         return lambda: change_page_func(-1)
                 
                 # Right arrow (next games)
-                if (self.current_page + 1) * self.games_per_page < len(games):
-                    right_arrow_x = self.resolution[0] - grid_margin_x + arrow_margin
+                if self.current_index + self.games_per_screen < len(games):
+                    # Position right arrow properly inside the screen
+                    right_arrow_x = min(self.resolution[0] - arrow_size - arrow_margin, 
+                                      self.resolution[0] - grid_margin_x // 2 - arrow_size // 2)
                     
                     # Draw a pixelated right arrow
                     right_arrow = self.drawer.draw_pixel_arrow(arrow_size, "right")
@@ -399,8 +396,7 @@ class MainScreen:
                                       admin_password_action)
         if admin_action:
             return admin_action
-        
-        # Exit button in top-right corner - extra space from main titles
+          # Exit button in top-right corner - extra space from main titles
         exit_button_x = int(game_x + game_title.get_width() - button_width)  # Align right with GAME title
         exit_button_y = int(lab_y + lab_title.get_height() + 20 * self.scale_y)
         exit_action = self.drawer.draw_button("Exit", exit_button_x, exit_button_y, 
@@ -410,11 +406,22 @@ class MainScreen:
             return exit_action
             
         return None
-    
+        
     def set_current_page(self, page):
-        """Set the current page for pagination.
+        """Set the current page for pagination (legacy method, kept for compatibility).
         
         Args:
             page: Page number
         """
-        self.current_page = page
+        # Convert page number to an index
+        self.current_index = page * self.games_per_screen
+        
+    def scroll_games(self, direction):
+        """Scroll the games by one in the specified direction.
+        
+        Args:
+            direction: 1 for forward (right), -1 for backward (left)
+        """
+        new_index = self.current_index + direction
+        if new_index >= 0:
+            self.current_index = new_index

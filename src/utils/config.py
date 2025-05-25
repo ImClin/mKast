@@ -3,6 +3,7 @@
 
 import os
 import json
+import pygame  # type: ignore
 
 def load_config():
     """Load configuration from config.json or create default if not found."""
@@ -41,3 +42,37 @@ def ensure_assets_directory():
     # Create game_images subdirectory if it doesn't exist
     if not os.path.exists("assets/game_images"):
         os.makedirs("assets/game_images")
+
+def detect_screen_resolution():
+    """Detect the current screen resolution using pygame.
+    
+    Returns:
+        tuple: (width, height) of the screen
+    """
+    # Initialize pygame if not already initialized
+    if not pygame.get_init():
+        pygame.init()
+        
+    # Get the display info
+    info = pygame.display.Info()
+    return (info.current_w, info.current_h)
+
+def update_config_with_screen_resolution():
+    """Update config.json with detected screen resolution."""
+    # Load the current config
+    config = load_config()
+    
+    # Detect screen resolution
+    width, height = detect_screen_resolution()
+    
+    # Update the config if resolution is different
+    if config.get("resolution") != [width, height]:
+        config["resolution"] = [width, height]
+        
+        # Save the updated config
+        with open('config.json', 'w') as f:
+            json.dump(config, f, indent=4)
+        
+        print(f"Updated config.json with detected screen resolution: {width}x{height}")
+    
+    return config

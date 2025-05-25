@@ -88,6 +88,11 @@ Het bestand `config.json` bevat instellingen die je kunt aanpassen:
 - Pas kleuren aan via de RGB-waarden in `theme`  
 - Wijzig wachtwoorden voor extra beveiliging
 
+De resolutie wordt automatisch gedetecteerd bij het opstarten. Je kunt ook deze opdracht gebruiken om de resolutie opnieuw te detecteren:
+```bash
+python main.py --update-resolution
+```
+
 ## Aangepaste Pixelart
 
 Voor de beste visuele ervaring kun je aangepaste pixelart gebruiken:

@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Admin panel for mKast Game Launcher."""
 
-import pygame
+import pygame  # type: ignore
 import threading
+import tkinter as tk
+from tkinter import filedialog
 from src.ui.drawing import WHITE
 from src.utils.icon_extractor import extract_icon_from_exe
 
@@ -29,8 +31,7 @@ class AdminPanel:
         self.scale_x = resolution[0] / 1920
         self.scale_y = resolution[1] / 1080
         self.scale_min = min(self.scale_x, self.scale_y)
-        
-        # Pagination
+          # Pagination
         self.current_page = 0
         self.games_per_page = 8  # Games per page in admin view
         
@@ -45,8 +46,11 @@ class AdminPanel:
         }
         self.admin_active_field = None
         self.admin_field_text = ''
-    
-    def draw(self, games, exit_admin_func, start_game_edit_func, delete_game_confirm_func, change_page_func):
+        
+        # Delete confirmation
+        self.delete_confirm_index = None
+
+    def draw(self, games, exit_admin_func, start_game_edit_func, delete_game_confirm_func, change_page_func, delete_game_func=None, save_admin_edit_func=None):
         """Draw the admin panel.
         
         Args:
@@ -55,6 +59,8 @@ class AdminPanel:
             start_game_edit_func: Function to call to start editing a game
             delete_game_confirm_func: Function to call to confirm game deletion
             change_page_func: Function to call to change page
+            delete_game_func: Function to call to actually delete the game
+            save_admin_edit_func: Function to call to save game edits
             
         Returns:
             Action function if a button was clicked, None otherwise
@@ -68,11 +74,13 @@ class AdminPanel:
         
         # Use the custom draw_text function that already handles anti-aliasing errors
         self.drawer.draw_text(title_text, self.title_font, (0, 255, 0), self.resolution[0]/2, title_y, align="center")
-        
-        # Check if we're in edit mode
+          # Check if we're in edit mode
         if self.admin_edit_mode:
             # Draw form for editing/adding
-            return self.draw_admin_edit_form()
+            return self.draw_admin_edit_form(save_admin_edit_func)
+          # If we have a delete confirmation dialog active, draw it
+        if self.delete_confirm_index is not None:
+            return self.draw_delete_confirmation(games, delete_game_func or delete_game_confirm_func)
         else:
             # Draw list of games for management
             start_index = self.current_page * self.games_per_page
@@ -208,9 +216,12 @@ class AdminPanel:
             return back_action
             
         return None
-    
-    def draw_admin_edit_form(self):
+
+    def draw_admin_edit_form(self, save_admin_edit_func=None):
         """Draw the form for editing/adding a game.
+        
+        Args:
+            save_admin_edit_func: Function to call to save game edits
         
         Returns:
             Action function if a button was clicked, None otherwise
@@ -332,15 +343,120 @@ class AdminPanel:
                            lambda: self.cancel_admin_edit())
         if cancel_action:
             return cancel_action
-            
-        # Save button
+              # Save button
         save_button_x = self.resolution[0]/2 + int(20 * self.scale_x)
         save_action = self.drawer.draw_button("Save", save_button_x, button_y, 
                           button_width, button_height, 
-                          lambda: self.save_admin_edit())
+                          save_admin_edit_func or (lambda: self.save_admin_edit()))
         if save_action:
             return save_action
             
+        return None
+    
+    def draw_delete_confirmation(self, games, delete_game_func):
+        """Draw the delete confirmation dialog.
+        
+        Args:
+            games: List of game dictionaries
+            delete_game_func: Function to call to delete the game
+            
+        Returns:
+            Action function if a button was clicked, None otherwise
+        """
+        index = self.delete_confirm_index
+        if index is None or index < 0 or index >= len(games):
+            self.delete_confirm_index = None
+            return None
+            
+        game = games[index]
+        
+        # Semi-transparent overlay
+        overlay = pygame.Surface(self.resolution, pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 180))  # Black with alpha
+        self.screen.blit(overlay, (0, 0))
+        
+        # Calculate dialog dimensions
+        dialog_width = int(500 * self.scale_x)
+        dialog_height = int(250 * self.scale_y)
+        dialog_x = (self.resolution[0] - dialog_width) // 2
+        dialog_y = (self.resolution[1] - dialog_height) // 2
+        
+        # Draw dialog background with pixelated border
+        pygame.draw.rect(self.screen, (40, 40, 70), (dialog_x, dialog_y, dialog_width, dialog_height))
+        
+        # Draw pixelated border
+        border_color = (255, 50, 50)  # Red border for delete confirmation
+        border_width = max(2, int(3 * self.scale_min))
+        
+        # Draw borders
+        pygame.draw.rect(self.screen, border_color, (dialog_x, dialog_y, dialog_width, border_width))
+        pygame.draw.rect(self.screen, border_color, (dialog_x, dialog_y + dialog_height - border_width, dialog_width, border_width))
+        pygame.draw.rect(self.screen, border_color, (dialog_x, dialog_y, border_width, dialog_height))
+        pygame.draw.rect(self.screen, border_color, (dialog_x + dialog_width - border_width, dialog_y, border_width, dialog_height))
+        
+        # Draw title
+        title = "DELETE GAME"
+        title_y = dialog_y + int(30 * self.scale_y)
+        self.drawer.draw_text(title, self.font, (255, 50, 50), self.resolution[0] // 2, title_y, align="center", 
+                      shadow=True, shadow_color=(100, 0, 0))
+        
+        # Draw confirmation message
+        message = f"Are you sure you want to delete the game:"
+        game_name = f"\"{game['name']}\""
+        
+        message_y = dialog_y + int(80 * self.scale_y)
+        game_y = dialog_y + int(120 * self.scale_y)
+        
+        self.drawer.draw_text(message, self.font, WHITE, self.resolution[0] // 2, message_y, align="center")
+        self.drawer.draw_text(game_name, self.font, (255, 255, 0), self.resolution[0] // 2, game_y, align="center", 
+                      shadow=True, shadow_color=(100, 100, 0))
+        
+        # Draw buttons
+        button_width = int(150 * self.scale_x)
+        button_height = int(50 * self.scale_y)
+        button_y = dialog_y + dialog_height - int(80 * self.scale_y)
+        
+        # Cancel button
+        cancel_x = dialog_x + int(50 * self.scale_x)
+        cancel_action = self.drawer.draw_button("Cancel", cancel_x, button_y, button_width, button_height, 
+                               lambda: self.cancel_delete())
+        if cancel_action:
+            return cancel_action
+        
+        # Delete button
+        delete_x = dialog_x + dialog_width - button_width - int(50 * self.scale_x)
+        delete_action = self.drawer.draw_button("Delete", delete_x, button_y, button_width, button_height, 
+                               lambda: self.confirm_delete(delete_game_func),
+                               hover_color=(255, 0, 0))
+        if delete_action:
+            return delete_action
+            
+        return None
+        
+    def cancel_delete(self):
+        """Cancel the delete confirmation.
+        
+        Returns:
+            None
+        """
+        self.delete_confirm_index = None
+        return None
+        
+    def confirm_delete(self, delete_game_func):
+        """Confirm the deletion of a game.
+        
+        Args:
+            delete_game_func: Function to call to delete the game
+            
+        Returns:
+            None
+        """
+        # Call the delete function with the index
+        if self.delete_confirm_index is not None:
+            delete_game_func(self.delete_confirm_index)
+        
+        # Reset delete confirmation
+        self.delete_confirm_index = None
         return None
     
     def activate_admin_field(self, field_name, current_value):
@@ -377,23 +493,59 @@ class AdminPanel:
         dialog_thread.start()
         return None
     
+    def _file_browser_thread(self, field_type):
+        """Run file browser in a separate thread to avoid freezing pygame.
+        
+        Args:
+            field_type: Type of file to browse for ('executable' or 'image')
+        """
+        # Create a root window but hide it
+        root = tk.Tk()
+        root.withdraw()
+        
+        try:
+            if field_type == 'executable':
+                # File browser for executables
+                file_path = filedialog.askopenfilename(
+                    title="Select Executable",
+                    filetypes=[("Executable files", "*.exe"), ("All files", "*.*")]
+                )
+                
+                if file_path:
+                    self.admin_form_data['executable_path'] = file_path
+                    
+            elif field_type == 'image':
+                # File browser for images
+                file_path = filedialog.askopenfilename(
+                    title="Select Image",
+                    filetypes=[("Image files", "*.png *.jpg *.jpeg *.gif *.bmp"), ("All files", "*.*")]
+                )
+                
+                if file_path:
+                    self.admin_form_data['image_path'] = file_path
+        finally:
+            # Make sure to destroy the root window
+            root.destroy()
+        
+        # Clear active field
+        self.admin_active_field = None
+    
     def cancel_admin_edit(self):
         """Cancel editing/adding and return to list.
         
         Returns:
-            None
-        """
+            None        """
         print("cancel_admin_edit called")
         # Clear all active fields
         self.admin_edit_mode = False
         self.admin_active_field = None
         return None
-    
+
     def save_admin_edit(self):
         """Save the edited/new game.
         
         Returns:
-            None
+            dict: The created game object, or None if validation failed
         """
         print("save_admin_edit called")
         
@@ -425,13 +577,30 @@ class AdminPanel:
             'image_path': self.admin_form_data['image_path'] or ""  # Use empty string instead of None
         }
         
-        # Update or add to list - handled by caller
+        # Store the game object for GameLauncher to access
+        self.edited_game = game
         
         # Reset form and return to list
         self.admin_edit_mode = False
+        
+        return game
         self.admin_active_field = None
         return None
     
+    def confirm_delete_game(self, delete_game_confirm_func):
+        """Confirm deletion of a game.
+        
+        Args:
+            delete_game_confirm_func: Function to call to confirm game deletion
+        """
+        if self.delete_confirm_index is not None:
+            delete_game_confirm_func(self.delete_confirm_index)
+            self.delete_confirm_index = None
+    
+    def cancel_delete_confirmation(self):
+        """Cancel the delete confirmation dialog."""
+        self.delete_confirm_index = None
+        
     def set_current_page(self, page):
         """Set the current page for pagination.
         
@@ -439,6 +608,30 @@ class AdminPanel:
             page: Page number
         """
         self.current_page = page
+        
+    def start_game_edit(self, index, games):
+        """Start editing a game or adding a new game.
+        
+        Args:
+            index: Index of the game to edit, or -1 for a new game
+            games: List of games
+        """
+        game_data = None
+        if index >= 0 and index < len(games):
+            game_data = games[index]
+        
+        self.set_edit_mode(True, index, game_data)
+    
+    def delete_game_confirm(self, index):
+        """Show delete confirmation for a game.
+        
+        Args:
+            index: Index of the game to delete
+        """
+        # Set the index of the game to delete
+        self.delete_confirm_index = index
+        print(f"delete_game_confirm called for index: {index}")
+        return None
     
     def set_edit_mode(self, is_edit_mode, index=-1, game_data=None):
         """Set edit mode for admin panel.

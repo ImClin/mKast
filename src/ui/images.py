@@ -2,8 +2,8 @@
 """Image handling for mKast Game Launcher."""
 
 import os
-import pygame
-from PIL import Image, ImageSequence
+import pygame  # type: ignore
+from PIL import Image, ImageSequence  # type: ignore
 
 class ImageManager:
     """Manager for game images and animations."""

@@ -73,9 +73,9 @@ class GameLauncher:
         
         # Initialize image manager
         self.image_manager = ImageManager(self.scale_min)
-          # Initialize drawing helpers
-        scale_factors = {'x': self.scale_x, 'y': self.scale_y, 'min': self.scale_min}
-        self.drawer = DrawingHelpers(self.screen, self.fonts, scale_factors)
+        
+        # Initialize drawing helpers
+        self.drawer = DrawingHelpers(self.screen, self.fonts, self.colors, self.scale_min)
         
         # Load games data
         self.games_file = games_file
@@ -91,7 +91,8 @@ class GameLauncher:
         # Game launcher state
         self.state = "main"  # main, admin, password
         self.running = True
-          # Mouse handling
+        
+        # Mouse handling
         self.last_click_time = 0
         self.click_delay = 300  # milliseconds
     
@@ -101,48 +102,20 @@ class GameLauncher:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.activate_password('exit')
-                  # Handle keyboard input for password dialog
-                if event.type == pygame.KEYDOWN and self.state == "password":
-                    if event.key == pygame.K_RETURN:
-                        self.check_password()
-                    elif event.key == pygame.K_ESCAPE:
-                        self.cancel_password()
-                    elif event.key == pygame.K_BACKSPACE:
-                        self.password_dialog.remove_char()
-                    elif event.unicode.isprintable():
-                        self.password_dialog.add_char(event.unicode)
-                
-                # Handle keyboard input for admin panel text fields
-                elif event.type == pygame.KEYDOWN and self.state == "admin" and self.admin_panel.admin_active_field:
-                    if event.key == pygame.K_RETURN or event.key == pygame.K_TAB:
-                        # Save the current field and deactivate it
-                        field_name = self.admin_panel.admin_active_field
-                        field_text = self.admin_panel.admin_field_text
-                        self.admin_panel.admin_form_data[field_name] = field_text
-                        self.admin_panel.admin_active_field = None
-                        print(f"Field {field_name} saved: {field_text}")
-                    elif event.key == pygame.K_ESCAPE:
-                        # Cancel editing the field
-                        self.admin_panel.admin_active_field = None
-                    elif event.key == pygame.K_BACKSPACE:
-                        # Remove the last character
-                        if len(self.admin_panel.admin_field_text) > 0:
-                            self.admin_panel.admin_field_text = self.admin_panel.admin_field_text[:-1]
-                    elif event.unicode.isprintable():
-                        # Add the character to the field
-                        self.admin_panel.admin_field_text += event.unicode
             
             # Handle states
             if self.state == "main":
                 action = self.main_screen.draw(self.games, 
                                            lambda: self.activate_password('admin'),
-                                           lambda: self.activate_password('exit'),                                           self.launch_game,                                           self.change_page)
+                                           lambda: self.activate_password('exit'),
+                                           self.launch_game,
+                                           self.change_page)
                 if action:
                     action()
             elif self.state == "admin":
                 action = self.admin_panel.draw(self.games, self.exit_admin_mode, 
                                            self.start_game_edit, self.delete_game_confirm,
-                                           self.change_page, self.delete_game, self.save_admin_edit)
+                                           self.change_page)
                 if action:
                     action()
                 
@@ -183,10 +156,6 @@ class GameLauncher:
         else:
             # Reset password input for retry
             self.password_dialog.password_input = ""
-    
-    def cancel_password(self):
-        """Cancel password entry and return to previous state."""
-        self.state = "main"
     
     def launch_game(self, executable_path):
         """Launch a game executable.
@@ -235,31 +204,26 @@ class GameLauncher:
     def delete_game_confirm(self, index):
         """Show delete confirmation for a game.
         
-        Args:            index: Index of the game to delete
+        Args:
+            index: Index of the game to delete
         """
         if 0 <= index < len(self.games):
             self.admin_panel.delete_game_confirm(index)
-
+    
     def save_admin_edit(self):
-        """Save game edit from admin panel."""        # Call admin panel's save method to get the game object
-        game = self.admin_panel.save_admin_edit()
-        
-        if game is None:
-            # Validation failed, don't save
-            return
-            
-        if self.admin_panel.admin_edit_index != -1:
+        """Save game edit from admin panel."""
+        if self.admin_panel.edit_index is not None:
             # Edit existing game
-            self.games[self.admin_panel.admin_edit_index] = game
+            self.games[self.admin_panel.edit_index] = self.admin_panel.edited_game
         else:
             # Add new game
-            self.games.append(game)
+            self.games.append(self.admin_panel.edited_game)
         
         # Save games to file
         self.games_data["games"] = self.games
         save_games(self.games_data, self.games_file)
         
-        # Exit edit mode (already done in admin_panel.save_admin_edit, but keeping for safety)
+        # Exit edit mode
         self.admin_panel.admin_edit_mode = False
     
     def cancel_admin_edit(self):

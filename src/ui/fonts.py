@@ -2,7 +2,7 @@
 """Font management for mKast Game Launcher."""
 
 import os
-import pygame
+import pygame  # type: ignore
 import urllib.request
 
 def load_pixel_fonts(scale_min):

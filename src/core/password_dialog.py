@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Password dialog for mKast Game Launcher."""
 
-import pygame
+import pygame  # type: ignore
 from src.ui.drawing import WHITE
 
 class PasswordDialog:
@@ -165,6 +165,14 @@ class PasswordDialog:
             return check_password_func
             
         return None
+    
+    def activate(self, purpose):
+        """Activate the password dialog with the given purpose.
+        
+        Args:
+            purpose: Purpose ('admin' or 'exit')
+        """
+        self.set_purpose(purpose)
     
     def set_purpose(self, purpose):
         """Set the purpose of the password dialog.
