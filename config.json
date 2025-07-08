@@ -9,8 +9,10 @@
     "version": "1.0.0"
   },
   "display": {
-    "fullscreen": true,
-    "kiosk": true,
+    "fullscreen": false,
+    "kiosk": false,
+    "borderless": true,
+    "maximized": true,
     "showCursor": true,
     "cursorMode": "auto"
   },

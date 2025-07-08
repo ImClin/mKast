@@ -34,7 +34,7 @@
                 <img src="assets/gamelab.png" alt="Game Lab" class="gamelab-image">
                 <div class="floating-controls">
                     <button class="retro-btn" onclick="showAdminPanel()">ADMIN</button>
-                    <button class="retro-btn danger" onclick="exitApplication()">EXIT</button>
+                    <button class="retro-btn danger" onclick="confirmExit()">EXIT</button>
                 </div>
             </div>
         </header>        <!-- Main content -->
@@ -156,53 +156,72 @@
         <div id="addGameModal" class="modal">
             <div class="modal-content">
                 <h2>NIEUWE GAME TOEVOEGEN</h2>
-                <form id="addGameForm" class="game-form">                    <div class="form-group">
-                        <label>Game Titel:</label>
-                        <input type="text" id="newGameTitle" class="retro-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Ontwikkelaar/Auteur:</label>
-                        <input type="text" id="newGameAuthor" class="retro-input" placeholder="bijv: John Doe Games">
-                    </div>
-                    <div class="form-group">
-                        <label>Beschrijving:</label>
-                        <textarea id="newGameDescription" class="retro-input" rows="4" required></textarea>
-                    </div><div class="form-group">
-                        <label>Genre:</label>
-                        <select id="newGameGenre" class="retro-input" required>
-                            <option value="">Selecteer Genre</option>
-                            <option value="ARCADE">ARCADE</option>
-                            <option value="SHOOTER">SHOOTER</option>
-                            <option value="FIGHTING">FIGHTING</option>
-                            <option value="PLATFORM">PLATFORM</option>
-                            <option value="PUZZLE">PUZZLE</option>
-                            <option value="RACING">RACING</option>
-                            <option value="SPORTS">SPORTS</option>
-                            <option value="RPG">RPG</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Game Type:</label>
-                        <select id="newGameType" class="retro-input" required>
-                            <option value="">Selecteer Type</option>
-                            <option value="executable">Executable (.exe bestand)</option>
-                            <option value="web">Web Game (HTML/URL)</option>
-                            <option value="browser">Browser Game (URL)</option>
-                        </select>
-                    </div><div class="form-group">
-                        <label>Executable Bestand:</label>
-                        <div class="file-input-group">
-                            <input type="text" id="newGameExecutable" class="retro-input" placeholder="bijv: game.exe" required>
-                            <button type="button" class="retro-btn small" onclick="browseForExecutable()">BROWSE</button>
+                <form id="addGameForm" class="game-form">
+                    
+                    <!-- Basic Game Information -->
+                    <div class="form-section">
+                        <div class="form-section-title">Basis Informatie</div>
+                        <div class="form-group">
+                            <label for="newGameTitle">Game Titel:</label>
+                            <input type="text" id="newGameTitle" class="retro-input" required placeholder="Bijvoorbeeld: Space Invaders">
+                        </div>
+                        <div class="form-group">
+                            <label for="newGameAuthor">Ontwikkelaar/Auteur:</label>
+                            <input type="text" id="newGameAuthor" class="retro-input" placeholder="Bijvoorbeeld: John Doe Games">
+                        </div>
+                        <div class="form-group">
+                            <label for="newGameDescription">Beschrijving:</label>
+                            <textarea id="newGameDescription" class="retro-input" rows="4" required placeholder="Beschrijf de game in een paar zinnen..."></textarea>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label>Afbeelding Pad (optioneel):</label>
-                        <div class="file-input-group">
-                            <input type="text" id="newGameImage" class="retro-input" placeholder="bijv: games/game.jpg">
-                            <button type="button" class="retro-btn small" onclick="browseForImage()">BROWSE</button>
+
+                    <!-- Game Classification -->
+                    <div class="form-section">
+                        <div class="form-section-title">Classificatie</div>
+                        <div class="form-group">
+                            <label for="newGameGenre">Genre:</label>
+                            <select id="newGameGenre" class="retro-input" required>
+                                <option value="">Selecteer Genre</option>
+                                <option value="ARCADE">ARCADE</option>
+                                <option value="SHOOTER">SHOOTER</option>
+                                <option value="FIGHTING">FIGHTING</option>
+                                <option value="PLATFORM">PLATFORM</option>
+                                <option value="PUZZLE">PUZZLE</option>
+                                <option value="RACING">RACING</option>
+                                <option value="SPORTS">SPORTS</option>
+                                <option value="RPG">RPG</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="newGameType">Game Type:</label>
+                            <select id="newGameType" class="retro-input" required>
+                                <option value="">Selecteer Type</option>
+                                <option value="executable">Executable (.exe bestand)</option>
+                                <option value="web">Web Game (HTML/URL)</option>
+                                <option value="browser">Browser Game (URL)</option>
+                            </select>
                         </div>
                     </div>
+
+                    <!-- Files & Assets -->
+                    <div class="form-section">
+                        <div class="form-section-title">Bestanden & Media</div>
+                        <div class="form-group">
+                            <label for="newGameExecutable">Executable Bestand:</label>
+                            <div class="file-input-group">
+                                <input type="text" id="newGameExecutable" class="retro-input" placeholder="Bijvoorbeeld: games/mygame.exe" required>
+                                <button type="button" class="retro-btn small" onclick="browseForExecutable()">BROWSE</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="newGameImage">Afbeelding Pad (optioneel):</label>
+                            <div class="file-input-group">
+                                <input type="text" id="newGameImage" class="retro-input" placeholder="Bijvoorbeeld: images/mygame.jpg">
+                                <button type="button" class="retro-btn small" onclick="browseForImage()">BROWSE</button>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="modal-buttons">
                         <button type="button" class="retro-btn" onclick="addNewGame()">GAME TOEVOEGEN</button>
                         <button type="button" class="retro-btn danger" onclick="closeAddGameModal()">ANNULEREN</button>

@@ -281,54 +281,36 @@ class KeyboardHandler {
         this.debugConsoleVisible = false;
     }
 
-    // Show exit application dialog
+    // Show exit confirmation directly (no modal)
     exitApplication() {
-        this.uiManager.showModal('exitModal');
-        setTimeout(() => {
-            const passwordField = document.getElementById('exitPassword');
-            if (passwordField) {
-                passwordField.focus();
-                passwordField.select();
-            }
-        }, 150);
+        this.confirmExit();
     }
 
     // Exit confirmation
     async confirmExit() {
-        const passwordField = document.getElementById('exitPassword');
-        const password = passwordField.value;
-        
         try {
-            const isValid = await ipcRenderer.invoke('verify-exit-password', password);
-            
-            if (isValid) {
-                this.soundManager.playShutdownSound();
-                this.uiManager.showLoadingScreen();
-                
-                setTimeout(async () => {
-                    await ipcRenderer.invoke('exit-application');
-                }, 2000);
-            } else {
-                this.soundManager.playErrorSound();
-                passwordField.value = '';
-                passwordField.focus();
-                
-                const errorMsg = document.createElement('div');
-                errorMsg.textContent = 'Onjuist wachtwoord!';
-                errorMsg.style.color = '#ff0080';
-                errorMsg.style.marginTop = '10px';
-                passwordField.parentNode.appendChild(errorMsg);
-                
-                setTimeout(() => {
-                    if (errorMsg.parentNode) {
-                        errorMsg.remove();
-                    }
-                }, 3000);
-            }
+            // Use custom confirmation dialog instead of standard Windows popup
+            this.uiManager.showConfirmDialog(
+                'APPLICATIE AFSLUITEN',
+                'Weet je zeker dat je de arcade launcher wilt afsluiten?',
+                async () => {
+                    // Confirmed - exit application
+                    this.soundManager.playShutdownSound();
+                    this.uiManager.showLoadingScreen();
+                    
+                    setTimeout(async () => {
+                        await ipcRenderer.invoke('exit-application');
+                    }, 2000);
+                },
+                () => {
+                    // Cancelled - do nothing, dialog will close automatically
+                    console.log('Exit cancelled by user');
+                }
+            );
         } catch (error) {
             console.error('ConfirmExit error:', error);
-            passwordField.value = '';
-            passwordField.focus();
+            this.soundManager.playErrorSound();
+            this.uiManager.hideLoadingScreen();
         }
     }
 

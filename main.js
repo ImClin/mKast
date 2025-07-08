@@ -6,14 +6,23 @@ let mainWindow;
 let config;
 
 function createWindow() {
-  // Create the main window with arcade-specific settings
+  // Get screen dimensions to cover taskbar
+  const { screen } = require('electron');
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const { width, height } = primaryDisplay.workAreaSize;
+  const { x, y } = primaryDisplay.bounds;
+
+  // Create the main window with borderless fullscreen settings
   mainWindow = new BrowserWindow({
-    width: 1920,
-    height: 1080,
-    fullscreen: true,
-    frame: false,
+    x: x,
+    y: y,
+    width: primaryDisplay.bounds.width,   // Full screen width
+    height: primaryDisplay.bounds.height, // Full screen height (covers taskbar)
+    fullscreen: false,
+    frame: false,  // Borderless
     resizable: false,
-    alwaysOnTop: true,
+    alwaysOnTop: false,  // Allow games to go on top
+    skipTaskbar: false,  // Keep in taskbar for Alt+Tab
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -21,17 +30,23 @@ function createWindow() {
     }
   });
 
+  // Don't use maximize() - set exact bounds to cover taskbar
+  mainWindow.setBounds({
+    x: 0,
+    y: 0, 
+    width: primaryDisplay.bounds.width,
+    height: primaryDisplay.bounds.height
+  });
+  
   // Load the main HTML file
   mainWindow.loadFile('index.html');
-  // Prevent window from being closed by user normally
-  mainWindow.on('close', (event) => {
-    // Only prevent close if not explicitly exiting
-    if (!app.isQuitting) {
-      event.preventDefault();
-    }
-  });
+  
+  // Allow normal window closing with Alt+F4
+  // mainWindow.on('close', (event) => {
+  //   // Window can be closed normally
+  // });
 
-  // Disable all keyboard shortcuts that could exit fullscreen
+  // Hide menu bar for cleaner look
   mainWindow.setMenuBarVisibility(false);
 }
 
@@ -41,31 +56,22 @@ app.whenReady().then(() => {
   
   createWindow();
 
-  // Disable all system shortcuts that could interfere
-  globalShortcut.register('Alt+F4', () => {
-    // Prevent Alt+F4 from closing the app
-    return false;
-  });
-
-  globalShortcut.register('F11', () => {
-    // Prevent F11 from toggling fullscreen
-    return false;
-  });
-
-  // globalShortcut.register('Escape', () => {
-  //   // Prevent Escape from exiting fullscreen
+  // Remove all system shortcuts restrictions - allow normal Windows behavior
+  // globalShortcut.register('Alt+F4', () => {
+  //   // Allow Alt+F4 to close the app normally
   //   return false;
   // });
 
-  // Allow Alt+Tab for now (commented out to allow task switching)
-  // globalShortcut.register('Alt+Tab', () => {
+  // globalShortcut.register('F11', () => {
+  //   // Allow F11 to toggle fullscreen normally
   //   return false;
   // });
 
-  globalShortcut.register('CommandOrControl+Shift+I', () => {
-    // Prevent DevTools
-    return false;
-  });
+  // Allow DevTools for debugging
+  // globalShortcut.register('CommandOrControl+Shift+I', () => {
+  //   // Allow DevTools
+  //   return false;
+  // });
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
@@ -75,10 +81,8 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => {
-  // Allow app to quit when explicitly requested
-  if (app.isQuitting) {
-    app.quit();
-  }
+  // Allow app to quit normally when all windows are closed
+  app.quit();
 });
 
 // Handle password verification for exit
@@ -181,17 +185,47 @@ ipcMain.handle('browse-for-file', async (event, fileType = 'executable') => {
 ipcMain.handle('launch-game', async (event, gamePath) => {
   try {
     const { spawn } = require('child_process');
+    
+    // Minimize the launcher window to give games priority
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.minimize();
+    }
+    
     const gameProcess = spawn(gamePath, [], { 
-      detached: true,
-      stdio: 'ignore'
+      detached: true,   // Detach so game runs independently 
+      stdio: 'ignore'   // Don't capture output to avoid interference
     });
     
-    gameProcess.unref(); // Allow parent to exit independently
+    // Unref so launcher doesn't wait for game to close
+    gameProcess.unref();
+    
+    // Don't restore the launcher automatically - let it stay minimized
+    // The user can Alt+Tab back to it if needed
     
     return { success: true, message: 'Game gestart!' };
   } catch (error) {
     console.error('Error launching game:', error);
+    // Only restore window if game actually failed to start
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.restore();
+    }
     return { success: false, message: `Fout bij starten game: ${error.message}` };
+  }
+});
+
+// Handle bringing launcher back to front
+ipcMain.handle('restore-launcher', () => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.restore();
+    mainWindow.focus();
+    mainWindow.show();
+  }
+});
+
+// Handle minimizing launcher (for games)
+ipcMain.handle('minimize-launcher', () => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.minimize();
   }
 });
 

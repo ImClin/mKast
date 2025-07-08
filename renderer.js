@@ -243,6 +243,56 @@ function cleanup() {
     }
 }
 
+// Debug function to find localStorage location and export data
+function findGameDataLocation() {
+    console.log('=== GAME DATA LOCATION DEBUG ===');
+    
+    // Show all localStorage data
+    const games = localStorage.getItem('arcadeLauncherGames');
+    console.log('Games data found:', games ? 'YES' : 'NO');
+    
+    if (games) {
+        const parsedGames = JSON.parse(games);
+        console.log('Number of games:', parsedGames.length);
+        console.log('Game data structure:', parsedGames[0] || 'No games');
+        console.log('Raw localStorage data:', games);
+        
+        // Create readable JSON file
+        const prettyJson = JSON.stringify(parsedGames, null, 2);
+        console.log('Formatted JSON:', prettyJson);
+        
+        // Export data to file for backup
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(prettyJson);
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", "mkast-games-readable.json");
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+        console.log('✅ Games exported to mkast-games-readable.json');
+    }
+    
+    // Show all localStorage keys
+    console.log('All localStorage keys:', Object.keys(localStorage));
+    
+    return games;
+}
+
+// Function to import game data from JSON
+function importGameData(jsonString) {
+    try {
+        const games = JSON.parse(jsonString);
+        localStorage.setItem('arcadeLauncherGames', JSON.stringify(games));
+        console.log('✅ Game data imported successfully');
+        if (gameManager) {
+            gameManager.initializeGames();
+            uiManager.renderGameGrid(gameManager.getAllGames());
+        }
+    } catch (error) {
+        console.error('❌ Failed to import game data:', error);
+    }
+}
+
 // Global functions for HTML onclick handlers (legacy compatibility)
 function showAddGameForm() {
     if (adminPanel) adminPanel.showAddGameForm();
@@ -305,7 +355,32 @@ function closeAdmin() {
 }
 
 async function confirmExit() {
-    if (keyboardHandler) await keyboardHandler.confirmExit();
+    // Use custom confirmation dialog instead of standard Windows popup
+    if (!uiManager) return;
+    
+    uiManager.showConfirmDialog(
+        'APPLICATIE AFSLUITEN',
+        'Weet je zeker dat je de arcade launcher wilt afsluiten?',
+        async () => {
+            // Confirmed - exit application
+            try {
+                if (soundManager) soundManager.playShutdownSound();
+                if (uiManager) uiManager.showLoadingScreen();
+                
+                setTimeout(async () => {
+                    await ipcRenderer.invoke('exit-application');
+                }, 2000);
+            } catch (error) {
+                console.error('Exit error:', error);
+                if (soundManager) soundManager.playErrorSound();
+                if (uiManager) uiManager.hideLoadingScreen();
+            }
+        },
+        () => {
+            // Cancelled - do nothing, dialog will close automatically
+            console.log('Exit cancelled by user');
+        }
+    );
 }
 
 function showAdminPanel() {
@@ -313,7 +388,8 @@ function showAdminPanel() {
 }
 
 function exitApplication() {
-    if (keyboardHandler) keyboardHandler.exitApplication();
+    // Direct exit without modal - this is called from old references
+    confirmExit();
 }
 
 function closePasswordModal() {
@@ -336,7 +412,7 @@ function closeEmbeddedGame() {
     if (gameLauncher) gameLauncher.closeEmbeddedGame();
 }
 
-// Make global functions available
+// Make functions globally available
 window.applyResponsiveGridClasses = applyResponsiveGridClasses;
 window.showAddGameForm = showAddGameForm;
 window.addNewGame = addNewGame;
@@ -361,6 +437,8 @@ window.closeExitModal = closeExitModal;
 window.launchGame = launchGame;
 window.minimizeEmbeddedGame = minimizeEmbeddedGame;
 window.closeEmbeddedGame = closeEmbeddedGame;
+window.findGameDataLocation = findGameDataLocation;
+window.importGameData = importGameData;
 
 // Event listeners
 document.addEventListener('DOMContentLoaded', async () => {

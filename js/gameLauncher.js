@@ -69,13 +69,9 @@ class GameLauncher {
             // Play launch sound
             this.soundManager.playLaunchSound();
             
-            // Show success notification
-            this.uiManager.showNotification(
-                'SPEL GESTART',
-                `${game.title} geladen!`,
-                'success',
-                3000
-            );
+            // Don't show notification for regular game launches
+            // to prevent launcher from coming back to foreground
+            console.log(`Game ${game.title} started successfully`);
             
         } catch (error) {
             console.error('LaunchEmbeddedGame error:', error);
@@ -104,12 +100,8 @@ class GameLauncher {
                     this.uiManager.hideLoadingScreen();
                     this.uiManager.closeModal('gameModal');
                     
-                    this.uiManager.showNotification(
-                        'Spel Gestart',
-                        `${game.title} is extern gestart!`,
-                        'success',
-                        3000
-                    );
+                    // Don't show notification to prevent launcher from coming back
+                    console.log(`Game ${game.title} started externally`);
                 }, 2000);
                 
             } else {
